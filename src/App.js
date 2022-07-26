@@ -1,27 +1,26 @@
 import './App.css';
-import { useEffect, useState } from 'react'
+// import Suspense with the rest of React features
+import { useEffect, useState, Suspense } from 'react'
 import Gallery from './components/Gallery'
 import SearchBar from './components/SearchBar'
+// import helper promise at app level
+// change function name to fetchData for better consistency
+import { createResource as fetchData } from './helper'
+import {createRoot} from 'react-dom/client';
 
 function App() {
   let [searchTerm, setSearchTerm] = useState('')
-  let [data, setData] = useState([])
+  // must change default useState to null instead of an array of objects now
+  let [data, setData] = useState(null)
   let [message, setMessage] = useState('Search for Music!')
 
+  // adapt use effect to fetchData function
+  // we reformatted type of data that our data state variable stores
+  // it doesn't store an array of objects now
   useEffect(() => {
     if (searchTerm) {
-      document.title=`${searchTerm} Music`
-      const fetchData = async () => {
-        const response = await fetch(`https://itunes.apple.com/search?term=${searchTerm}`)
-        const resData = await response.json()
-        if(resData.results.length > 0) {
-          setData(resData.results)
-        } else {
-          setMessage('Not Found')
-        }
-      }
-      fetchData()
-  }
+        setData(fetchData(searchTerm))
+    }
   }, [searchTerm])
 
   const handleSearch = (e, term) => {
@@ -29,11 +28,24 @@ function App() {
     setSearchTerm(term)
   }
 
+  // must tell app to wait for data before trying to render the gallery component
+  const renderGallery = () => {
+    if(data){
+      return (
+        <Suspense fallback={<h1>Loading...</h1>}>
+          <Gallery data={data} />
+        </Suspense>
+      )
+    }
+  }
+
   return (
     <div className="App">
       <SearchBar handleSearch={handleSearch} />
       {message}
-      <Gallery data={data} />
+      {renderGallery()}
+
+      
     </div>
   );
 }
