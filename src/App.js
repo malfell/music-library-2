@@ -6,7 +6,7 @@ import SearchBar from './components/SearchBar'
 // import helper promise at app level
 // change function name to fetchData for better consistency
 import { createResource as fetchData } from './helper'
-import {createRoot} from 'react-dom/client';
+import Spinner from './components/Spinner'
 
 function App() {
   let [searchTerm, setSearchTerm] = useState('')
@@ -32,7 +32,7 @@ function App() {
   const renderGallery = () => {
     if(data){
       return (
-        <Suspense fallback={<h1>Loading...</h1>}>
+        <Suspense fallback={<Spinner />}>
           <Gallery data={data} />
         </Suspense>
       )
